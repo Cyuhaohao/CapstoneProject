@@ -479,17 +479,13 @@ def playgame(map_generation,cover,ai):
 
 # Define the function for intelligent agent player to check the surrondings.
 def look_around(x, y,config_copy,pre_loc,mode="random"):
-
-    # Check whether there is door nearby
     door_pos=[]
     for x_c in range(np.max([0,x-3]),np.min([x+4,n])):
         for y_c in range(np.max([0,y-3]),np.min([y+4,n])):
             if [x_c,y_c] not in [[x-3,y-3],[x-3,y+4],[x+4,y-3],[x+4,y+4]]:
-                # Record the place of the door
                 if config[x_c][y_c]==2:
                     door_pos=[x_c,y_c]
 
-    # Check the spaces in each direction and the Prospect Score
     potentiallist = []
     potenticalscore = []
     if config[x-1, y] != 0:
@@ -532,7 +528,6 @@ def look_around(x, y,config_copy,pre_loc,mode="random"):
                         pscore += 1
         potenticalscore.append(pscore)
 
-    # If there is a door nearby, use A* algorithm to move towards the door
     if door_pos!=[]:
         new_potlist=[]
         for i in potentiallist:
@@ -544,7 +539,6 @@ def look_around(x, y,config_copy,pre_loc,mode="random"):
                 pot_dis.append(abs(i[0]-door_pos[0])+abs(i[1]-door_pos[1]))
             return new_potlist[pot_dis.index(np.min(pot_dis))]
 
-    # Follow the RandomWalk Algorithm's instructing rules described in the paper
     if mode=="random":
         worst_choice=[]
         bad_choice=[]
@@ -585,7 +579,6 @@ def look_around(x, y,config_copy,pre_loc,mode="random"):
     if mode=="findspace":
         return potentiallist[potenticalscore.index(np.max(potenticalscore))]
 
-    # Follow the WallFollow Algorithm's instructing rules described in the paper
     if mode=="wallfollow":
         if pre_loc[-1]==[]:
             return potentiallist[0]
@@ -627,7 +620,7 @@ def look_around(x, y,config_copy,pre_loc,mode="random"):
             return random.sample(possible_result,1)[0]
 
 
-# Define the class for randomwalk algorithm
+
 class RandomMove():
     # Initialize the room and parameters
     def __init__(self,mode="random"):
@@ -635,11 +628,9 @@ class RandomMove():
         self.mode=mode
         self.pre_loc=[[]]*30
 
-    # Restart the ai when entering a new level
     def start_ai(self):
         self.config_copy = []
         self.pre_loc = [[]] * 30
-        # Generate the map record in the class
         for x in range(n):
             line_x=[]
             for y in range(n):
@@ -661,20 +652,16 @@ class RandomMove():
         #     for y_c in range(np.max([0, next_choice[1] - 3]), np.min([next_choice[1] + 4, n])):
         #         self.config_copy[x_c][y_c] = 4
 
-# Define the class for wallfollow algorithm
 class WallFollow():
-    #Initiaze the AI agent
     def __init__(self):
         self.config_copy =[]
         self.pre_loc=[[]]*30
         self.mode=0
 
-    # Restart the ai when entering a new level
     def start_ai(self):
         self.mode=0
         self.config_copy = []
         self.pre_loc=[[]]*30
-        # Generate the map record in the class
         for x in range(n):
             line_x=[]
             for y in range(n):
@@ -684,7 +671,6 @@ class WallFollow():
                     line_x.append(1)
             self.config_copy.append(line_x)
 
-    # Decide the next step of the agent
     def move(self):
         global config, current_place
         if self.mode==0:
