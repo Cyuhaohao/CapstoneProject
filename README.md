@@ -10,14 +10,14 @@
 
 ### DCGAN Training
 1. have the preprocessed images, you can also access it by: https://drive.google.com/file/d/19jHdSa-W4SCvqRWt5i1DKWAAbJfjh2Go/view?usp=sharing
-2. open DCGAN_CP.ipynb
-3. install all the necessary libraries
+2. open DCGAN_CP_v2.ipynb with google colab
+3. upload the datasets
 4. run the code blocks one by one
 
 ## For Gameplay
 1. install required package like pygame
 2. run `python3 Game.py` to start the game
-3. run `python 3 Game.py MAPNAME COVERSTATE AINAME` to run different modes
+3. run `python3 Game.py MAPNAME COVERSTATE AINAME` to run different modes
    1. MAPNAME: myway - room overlay algorithm; dungeon - dungeon algorithm
    2. COVERSTATE: on - you can see the shadow; off - you cannot see the shadow
    3. AINAME: rw - Random Walk Algorithm; wf - WallFollow Algorithm
