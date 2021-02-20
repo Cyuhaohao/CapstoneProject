@@ -1,15 +1,10 @@
+# Do the Monte Carlo analysis to compare RW and WF algorithms' efficiency
+
 # Import necessary libraries
-import pygame
-from pygame.locals import *
 from pylab import *
 import math
 import random
-import time
-import sys
-# import dcgan_game
-
-# Init the pygame window
-pygame.init()
+import matplotlib.pyplot as plt
 
 # Define some key values
 # Life of the warrior
@@ -31,11 +26,6 @@ size = (w, h)
 level=1
 ai_speed=3
 
-
-# Define the window to display the pygame
-window = pygame.display.set_mode(size)
-# Write the caption as the name of the game
-pygame.display.set_caption("MYSTERIOUS TOWER")
 
 # Randomly select one pivot around the existing pivot so that if we generate two 55 squares
 # whose centers are the existing pivot and the new pivot, the two 585 squares generated will have overlapping areas or sides.
@@ -84,7 +74,7 @@ def locate_random(num_space,way):
                         return [a, b]
 
 def placement(way="random"):
-    global config, current_place, num_space, destination, animal_list
+    global config, current_place1, current_place2, num_space, destination, animal_list
 
     # Calculate the total number of standable places
     num_space = 0
@@ -102,6 +92,8 @@ def placement(way="random"):
 
     # Randomly choose the current place
     current_place = locate_random(num_space,way)
+    current_place1 =current_place
+    current_place2 =current_place
 
     find_door=0
     # Iterate for 30 loops to find if there can be a randomly selected coordinates for the posistion of "door"
@@ -173,308 +165,74 @@ def check_nearby(x,y,x_pre,y_pre):
                 return False
     return True
 
-def connector_move(x,y):
-    global config
-    random_list=[[1,0],[-1,0],[0,1],[0,-1]]
-    random.shuffle(random_list)
-    if check_nearby(x+random_list[0][0], y+random_list[0][1],x,y):
-        config[x+random_list[0][0], y+random_list[0][1]]=1
-        connector_move(x+random_list[0][0],y+random_list[0][1])
-    if check_nearby(x+random_list[1][0], y+random_list[1][1],x,y):
-        config[x+random_list[1][0], y+random_list[1][1]]=1
-        connector_move(x+random_list[1][0],y+random_list[1][1])
-    if check_nearby(x+random_list[2][0], y+random_list[2][1],x,y):
-        config[x+random_list[2][0], y+random_list[2][1]]=1
-        connector_move(x+random_list[2][0],y+random_list[2][1])
-    if check_nearby(x+random_list[3][0], y+random_list[3][1],x,y):
-        config[x+random_list[3][0], y+random_list[3][1]]=1
-        connector_move(x+random_list[3][0],y+random_list[3][1])
-    return
 
-def initialize2():
-    global config,n
+# The core function for this part
+def simulate():
+    global level
+    rm_steps_levels = []
+    wf_steps_levels = []
 
-    n=np.min([20+2*level,61])
-    lower_b=int(level/3)+2
-    upper_b=int(level/2)+4
-
-    config = zeros([n, n])
-
-    square_loc=[]
-    for i in range(200):
-        r_w=random.randint(lower_b,upper_b)
-        r_l=random.randint(lower_b,upper_b)
-        place_x=random.randint(3,n - 3 - r_w)
-        place_y = random.randint(3, n - 3-r_l)
-        occupied=0
-        for x in range(r_w+6):
-            for y in range(r_l+6):
-                if config[place_x+x-3][place_y+y-3]!=0:
-                    occupied=1
+    # Iterate for each level
+    for l in range(1,21):
+        level = l
+        rm_steps_list = []
+        wf_steps_list = []
+        # Iterate for 1000 times
+        for times in range(1000):
+            initialize()
+            randommove_ai.start_ai()
+            wallfollow_ai.start_ai()
+            rm_steps=0
+            wf_steps=0
+            while True:
+                if current_place1 == destination and current_place2 == destination:
+                    rm_steps_list.append(rm_steps)
+                    wf_steps_list.append(wf_steps)
                     break
-            if occupied==1:
-                break
-        if occupied==0:
-            for x in range(r_w):
-                for y in range(r_l):
-                    config[place_x + x][place_y + y]=7
-            square_loc.append([place_x,place_y,place_x + x,place_y + y])
-    last_loc=square_loc[-1]
-    xlist=[last_loc[0],last_loc[2]]
-
-    for x in range(2):
-        for y in range(last_loc[1],last_loc[3]+1):
-            cur_coor=[xlist[x],y]
-            if check_nearby(cur_coor[0]+(x*2-1),cur_coor[1],cur_coor[0],cur_coor[1]):
-                config[cur_coor[0]+(x*2-1)][cur_coor[1]]=1
-                break
-
-    connector_move(cur_coor[0]+(x*2-1),cur_coor[1])
-
-    for i in range(len(square_loc)-1):
-        loc_now=square_loc[i]
-        chosen_line=random.randint(0,3)
-        connected=0
-        if chosen_line in [0,2]:
-            for y in range(loc_now[1],loc_now[3]+1):
-                if config[loc_now[chosen_line]+2*(chosen_line-1)][y]==1:
-                    config[loc_now[chosen_line]+(chosen_line-1)][y]=1
-                    connected=1
+                if rm_steps>1500 or wf_steps>1500:
+                    rm_steps_list.append(rm_steps)
+                    wf_steps_list.append(wf_steps)
                     break
-        else:
-            for x in range(loc_now[0],loc_now[2]+1):
-                if config[x][loc_now[chosen_line]+2*(chosen_line-2)]==1:
-                    config[x][loc_now[chosen_line]+(chosen_line-2)]=1
-                    connected = 1
-                    break
-        if connected==0:
-            for x in range(loc_now[0],loc_now[2]+1):
-                for y in range(loc_now[1], loc_now[3] + 1):
-                    config[x][y]=0
+                if current_place1 != destination:
+                    randommove_ai.move()
+                    rm_steps+=1
+                if current_place2 != destination:
+                    wallfollow_ai.move()
+                    wf_steps+=1
+                for animal in range(len(animal_list)):
+                    # Use function 0.01+level*0.005 to act as the probability for each animal to move per millisecond
+                    if random.random() < 0.01 + level * 0.005:
+                        # 50% percent to move vertical
+                        if random.random() < 0.5:
+                            move = random.sample([-1, 1], 1)
+                            if config[animal_list[animal][0] + move[0]][animal_list[animal][1]] == 1:
+                                config[animal_list[animal][0]][animal_list[animal][1]] = 1
+                                # Reset the place of the animal
+                                animal_list[animal] = [animal_list[animal][0] + move[0], animal_list[animal][1]]
+                                config[animal_list[animal][0]][animal_list[animal][1]] = 3
+                        # 50% percent to move horizontal
+                        else:
+                            move = random.sample([-1, 1], 1)
+                            if config[animal_list[animal][0]][animal_list[animal][1] + move[0]] == 1:
+                                config[animal_list[animal][0]][animal_list[animal][1]] = 1
+                                animal_list[animal] = [animal_list[animal][0], animal_list[animal][1] + move[0]]
+                                config[animal_list[animal][0]][animal_list[animal][1]] = 3
+        rm_steps_levels.append(mean(rm_steps_list))
+        wf_steps_levels.append(mean(wf_steps_list))
+        print("Level",l,"analysis finished")
 
-    placement(way="inroom")
 
-    for x in range(61):
-        for y in range(61):
-            if x<n and y<n:
-                if config[x][y]==7:
-                    config[x][y]=1
-
-
-
-
+    # Draw the plots
+    plt.plot(rm_steps_levels,label="RandomWalk")
+    plt.plot(wf_steps_levels,label="WallFollow")
+    plt.xlabel("Levels")
+    plt.ylabel("Average steps taken to pass the level")
+    plt.legend()
+    plt.title("Average steps taken to pass each level for the two algorithms")
+    plt.show()
 
 
-# Main function for the game
-def main(map_generation="myway",cover="on",ai=None,mode=1,player=2):
-    while True:
-        # Play the bgm infinitely
-        music = pygame.mixer.Sound("game_resources/bgm.wav")
-        music.play(-1)
-        # Start the game
-        startgame()
-        # After the introduction page, start the main game
-        playgame(map_generation,cover,ai)
-        # Stop the music
-        music.stop()
-        t_now=time.time()
-        # Load the "you lose" voice
-        pygame.mixer.music.load("game_resources/youlose.wav")
-        # Play it for once
-        pygame.mixer.music.play(1)
-        # Quit the program after 3 seconds
-        while time.time()-t_now<3:
-            continue
-        break
 
-# Define a function to quit the game
-def terminate():
-    pygame.quit()
-    sys.exit()
-
-# The introduction page
-def startgame():
-    # Load the introduction page to the window
-    gameStart = pygame.image.load("game_resources/gamestart.png")
-    window.blit(gameStart, (70, 30))
-    pygame.display.update()
-    # Listen to the events of the keyboard, if RETURN button is pressed, enter the main game
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN:
-                if (event.key == pygame.K_ESCAPE):
-                    terminate()
-                elif (event.key == pygame.K_RETURN):
-                    return
-
-# The function for the main part of the game
-def playgame(map_generation,cover,ai):
-    global level,life,cover_surf
-    ai_timer = 0
-    quit = True
-    clock = pygame.time.Clock()
-    # Initialize the map for the first level
-    if map_generation=="myway":
-        initialize()
-    elif map_generation=="dungeon":
-        initialize2()
-    radius = w_cell * 3.5
-    if ai!=None:
-        ai.start_ai()
-    # Listen to the event of the keyboard
-    while quit:
-        for event in pygame.event.get():
-            # If quit button is clicked, then quit
-            if event.type == pygame.QUIT:
-                quit = False
-            elif event.type == pygame.KEYDOWN:
-                # Due to the press of Up, Left, Right, and Down button, move the character
-                if event.key == K_LEFT:
-                    if config[current_place[0]-1][current_place[1]]!=0:
-                        current_place[0]-=1
-                elif event.key == K_RIGHT:
-                    if config[current_place[0] + 1][current_place[1]] != 0:
-                        current_place[0] += 1
-                elif event.key == K_UP:
-                    if config[current_place[0]][current_place[1]-1] != 0:
-                        current_place[1] -= 1
-                elif event.key == K_DOWN:
-                    if config[current_place[0]][current_place[1] + 1] != 0:
-                        current_place[1] += 1
-
-        # When life points go to 0, end the game
-        if life==0:
-            break
-
-        # Display the levels you are in
-        pygame.display.set_caption("MYSTERIOUS TOWEL(Level "+str(level)+")")
-
-        # If the character met the destination
-        if current_place==destination:
-            # Load next level voice
-            pygame.mixer.music.load("game_resources/nextlevel.wav")
-            pygame.mixer.music.play(1)
-            # Iniatilize the new map
-            if map_generation == "myway":
-                initialize()
-            elif map_generation == "dungeon":
-                initialize2()
-            if ai!=None:
-                ai.start_ai()
-            level+=1
-            print("You enter level:", level)
-
-        met_animal=0
-        # Iterate the animal list to see if you meet an animal
-        for animal in range(len(animal_list)):
-            if animal_list[animal]==current_place:
-                life-=1
-                # Set meet animal value to 1
-                met_animal=1
-                # Delete the animal from the map
-                animal_list.pop(animal)
-                # Randomly play the sound of the animal, which is stored in the resources doc
-                pygame.mixer.music.load(random.sample(["game_resources/creepylaugh.wav","game_resources/catcall.wav","game_resources/dogcall.wav","game_resources/tigercall.wav"],1)[0])
-                pygame.mixer.music.play(1)
-                break
-
-        # Move the animal in a given algorithm
-        for animal in range(len(animal_list)):
-            # Use function 0.01+level*0.005 to act as the probability for each animal to move per millisecond
-            if random.random() < 0.01+level*0.005:
-                # 50% percent to move vertical
-                if random.random()<0.5:
-                    move = random.sample([-1, 1], 1)
-                    if config[animal_list[animal][0] + move[0]][animal_list[animal][1]] == 1:
-                        config[animal_list[animal][0]][animal_list[animal][1]] = 1
-                        # Reset the place of the animal
-                        animal_list[animal] = [animal_list[animal][0] + move[0], animal_list[animal][1]]
-                        config[animal_list[animal][0]][animal_list[animal][1]]=3
-                # 50% percent to move horizontal
-                else:
-                    move = random.sample([-1, 1], 1)
-                    if config[animal_list[animal][0]][animal_list[animal][1] + move[0]] == 1:
-                        config[animal_list[animal][0]][animal_list[animal][1]] = 1
-                        animal_list[animal] = [animal_list[animal][0], animal_list[animal][1] + move[0]]
-                        config[animal_list[animal][0]][animal_list[animal][1]] = 3
-
-        if ai!=None:
-            if ai_timer%3==0:
-                ai.move()
-            ai_timer+=ai_speed
-
-        # Make the view super effect of the game
-        # Create the center of the clip, which is the warrior
-        clip_center = ((current_place[0]+0.5)*w_cell,(current_place[1]+0.5)*w_cell)
-        # Create another window to cover the untouchable areas into darkness
-        cover_surf = pygame.Surface((radius * 2, radius * 2))
-        cover_surf.fill(0)
-        cover_surf.set_colorkey((255, 255, 255))
-        # Draw the transparent center circle
-        pygame.draw.circle(cover_surf, (255, 255, 255), (radius, radius), radius)
-        window.fill(0)
-        # Display the clip
-        if cover=="on":
-            clip_rect = pygame.Rect(clip_center[0] - radius, clip_center[1] - radius, radius * 2, radius * 2)
-            window.set_clip(clip_rect)
-
-        # Draw the background to white
-        pygame.draw.rect(window,(255,255,255), (0, 0, w, h))
-
-        # Draw all the walls and barriers in the map
-        for a in range(len(config)):
-            for b in range(len(config)):
-                left = a * w_cell
-                top = b * h_cell
-                if config[a][b]== 0:
-                    pygame.draw.rect(window, (128,128,128), (left, top, w_cell, h_cell))
-                if ai!=None:
-                    if ai.config_copy[a][b]==4:
-                        pygame.draw.rect(window, (0, 100, 0), (left, top, w_cell, h_cell))
-
-        # Draw the warrior(player)
-        pygame.draw.circle(window, (255, 0, 0), ((current_place[0]+0.5) * w_cell, (current_place[1]+0.5) * h_cell),w_cell/2)
-
-        # Draw the destination
-        pygame.draw.rect(window, (0, 255, 0), (destination[0] * w_cell, destination[1] * h_cell, w_cell, h_cell))
-
-        # Draw the animals
-        for animal in animal_list:
-            pygame.draw.circle(window, (0, 0, 255),
-                               ((animal[0] + 0.5) * w_cell, (animal[1] + 0.5) * h_cell), w_cell / 2)
-
-        # Function to render the level num in the window(Bugs to be fixed)
-        # font = pygame.font.SysFont(None, 48)
-        # textobj = font.render('Level: {}'.format(level), 1, (255,255,255))
-        # textrect = textobj.get_rect()
-        # textrect.topleft = (20, 20)
-        # window.blit(textobj, textrect)
-
-        # Display the maps situation
-        if cover=="on":
-            window.blit(cover_surf, clip_rect)
-        pygame.display.flip()
-
-        # If the player crashed into an animal
-        if met_animal==1:
-
-            # Randomly show the picture of a randomly generated animal(bugs need to be fixed)
-            # dcgan_game.create_creature()
-            # animal_image = pygame.image.load("animal.png")
-
-            # The current substitute method, to randomly choose an image from two imported monster figure
-            animal_image = pygame.image.load(random.sample(["game_resources/q1.png","game_resources/q4.png"],1)[0])
-            window.blit(animal_image, ((current_place[0] - 2) * w_cell, (current_place[1] - 2) * w_cell))
-            pygame.display.update()
-
-            # Display the image for 1 second
-            t_now = time.time()
-            while time.time() - t_now < 1:
-                continue
-
-        clock.tick(20)
 
 
 # Define the function for intelligent agent player to check the surrondings.
@@ -634,7 +392,7 @@ class RandomMove():
         for x in range(n):
             line_x=[]
             for y in range(n):
-                if current_place==[x,y]:
+                if current_place1==[x,y]:
                     line_x.append(4)
                 else:
                     line_x.append(1)
@@ -642,15 +400,13 @@ class RandomMove():
 
     # Decide the next step of the agent
     def move(self):
-        global config, current_place
-        next_choice = look_around(current_place[0], current_place[1],self.config_copy,self.pre_loc,mode=self.mode)
+        global config, current_place1
+        next_choice = look_around(current_place1[0], current_place1[1],self.config_copy,self.pre_loc,mode=self.mode)
         self.pre_loc=self.pre_loc[1:]
-        self.pre_loc.append(current_place)
-        current_place=next_choice
+        self.pre_loc.append(current_place1)
+        current_place1=next_choice
         self.config_copy[next_choice[0]][next_choice[1]]=4
-        # for x_c in range(np.max([0, next_choice[0] - 3]), np.min([next_choice[0] + 4, n])):
-        #     for y_c in range(np.max([0, next_choice[1] - 3]), np.min([next_choice[1] + 4, n])):
-        #         self.config_copy[x_c][y_c] = 4
+
 
 class WallFollow():
     def __init__(self):
@@ -665,50 +421,30 @@ class WallFollow():
         for x in range(n):
             line_x=[]
             for y in range(n):
-                if current_place==[x,y]:
+                if current_place2==[x,y]:
                     line_x.append(4)
                 else:
                     line_x.append(1)
             self.config_copy.append(line_x)
 
     def move(self):
-        global config, current_place
+        global config, current_place2
         if self.mode==0:
-            if config[current_place[0]-1][current_place[1]]==1:
-                next_choice=[current_place[0]-1,current_place[1]]
+            if config[current_place2[0]-1][current_place2[1]]==1:
+                next_choice=[current_place2[0]-1,current_place2[1]]
             else:
                 self.mode=1
         if self.mode==1:
-            next_choice = look_around(current_place[0], current_place[1], self.config_copy, self.pre_loc, mode="wallfollow")
+            next_choice = look_around(current_place2[0], current_place2[1], self.config_copy, self.pre_loc, mode="wallfollow")
         self.pre_loc = self.pre_loc[1:]
-        self.pre_loc.append(current_place)
-        current_place = next_choice
+        self.pre_loc.append(current_place2)
+        current_place2 = next_choice
         self.config_copy[next_choice[0]][next_choice[1]] = 4
 
 
+# Run the simulation
 randommove_ai=RandomMove()
 wallfollow_ai=WallFollow()
 
-if len(sys.argv)==1:
-    main(map_generation="myway", cover="on", ai=None)
-
-inputwayofmodel = sys.argv[1]
-inputcover=sys.argv[2]
-inputai = sys.argv[3]
-
-if inputai=="rw":
-    main(map_generation=inputwayofmodel, cover=inputcover, ai=randommove_ai)
-elif inputai=="wf":
-    main(map_generation=inputwayofmodel, cover=inputcover, ai=wallfollow_ai)
-
-# if inputwayofmodel==1:
-#     if inputai==0:
-#         main(map_generation="myway",cover="on")
-#     else:
-#         main(map_generation="myway", cover="on", ai=randommove_ai)
-# elif inputwayofmodel==2:
-#     if inputai==0:
-#         main(map_generation="dungeon",cover="on")
-#     else:
-#         main(map_generation="dungeon", cover="on", ai=randommove_ai)
+simulate()
 
