@@ -703,26 +703,37 @@ class WallFollow():
 randommove_ai=RandomMove()
 wallfollow_ai=WallFollow()
 
+
 if len(sys.argv)==1:
-    main(map_generation="myway", cover="on", ai=None)
+    while True:
+        mode_choose=int(input("Choose the mode:\n1. Classic\n2. PvC\n"))
+        if mode_choose in [1,2]:
+            break
+        else:
+            print("Please enter 1 or 2")
+    while True:
+        map_choose=int(input("Choose the map:\n1. Classic\n2. Dungeon\n"))
+        if map_choose in [1,2]:
+            break
+        else:
+            print("Please enter 1 or 2")
+    if mode_choose==2:
+        while True:
+            difficulty_choose = int(input("Choose the difficulty:\n1. Easy\n2. Hard\n"))
+            if difficulty_choose in [1, 2]:
+                main(map_generation=["myway", "dungeon"][map_choose - 1], cover="on",
+                     ai=[randommove_ai, wallfollow_ai][difficulty_choose - 1])
+                break
+            else:
+                print("Please enter 1 or 2")
 
-inputwayofmodel = sys.argv[1]
-inputcover=sys.argv[2]
-inputai = sys.argv[3]
+    main(map_generation=["myway","dungeon"][map_choose-1], cover="on", ai=None)
 
-if inputai=="rw":
-    main(map_generation=inputwayofmodel, cover=inputcover, ai=randommove_ai)
-elif inputai=="wf":
-    main(map_generation=inputwayofmodel, cover=inputcover, ai=wallfollow_ai)
-
-# if inputwayofmodel==1:
-#     if inputai==0:
-#         main(map_generation="myway",cover="on")
-#     else:
-#         main(map_generation="myway", cover="on", ai=randommove_ai)
-# elif inputwayofmodel==2:
-#     if inputai==0:
-#         main(map_generation="dungeon",cover="on")
-#     else:
-#         main(map_generation="dungeon", cover="on", ai=randommove_ai)
-
+if len(sys.argv)==4:
+    inputwayofmodel = sys.argv[1]
+    inputcover=sys.argv[2]
+    inputai = sys.argv[3]
+    if inputai=="rw":
+        main(map_generation=inputwayofmodel, cover=inputcover, ai=randommove_ai)
+    elif inputai=="wf":
+        main(map_generation=inputwayofmodel, cover=inputcover, ai=wallfollow_ai)
