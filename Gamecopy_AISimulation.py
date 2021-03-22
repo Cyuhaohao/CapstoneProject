@@ -5,6 +5,8 @@ from pylab import *
 import math
 import random
 import matplotlib.pyplot as plt
+from scipy import stats
+import numpy as np
 
 # Define some key values
 # Life of the warrior
@@ -165,9 +167,15 @@ def check_nearby(x,y,x_pre,y_pre):
                 return False
     return True
 
+# Function for t-statistics test
+def t_test(sample1, sample2):
+    (statistic, pvalue) = stats.ttest_ind(sample1, sample2)
+
+    print("t statistic is: ", statistic)
+    print("pvalue is: ", pvalue)
 
 # The core function for this part
-def simulate():
+def simulate(iter_times):
     global level
     rm_steps_levels = []
     wf_steps_levels = []
@@ -178,7 +186,7 @@ def simulate():
         rm_steps_list = []
         wf_steps_list = []
         # Iterate for 1000 times
-        for times in range(1000):
+        for times in range(iter_times):
             initialize()
             randommove_ai.start_ai()
             wallfollow_ai.start_ai()
@@ -217,9 +225,30 @@ def simulate():
                                 config[animal_list[animal][0]][animal_list[animal][1]] = 1
                                 animal_list[animal] = [animal_list[animal][0], animal_list[animal][1] + move[0]]
                                 config[animal_list[animal][0]][animal_list[animal][1]] = 3
-        rm_steps_levels.append(mean(rm_steps_list))
-        wf_steps_levels.append(mean(wf_steps_list))
+
+        # Calculate the means
+        mean1=mean(rm_steps_list)
+        mean2=mean(wf_steps_list)
+
+        # Calculate the stds
+        std1=np.std(rm_steps_list)
+        std2 = np.std(wf_steps_list)
+
+        rm_steps_levels.append(mean1)
+        wf_steps_levels.append(mean2)
         print("Level",l,"analysis finished")
+
+        # Check t-statistics
+        print("Mean for RM is:",mean1)
+        print("Mean for WF is:", mean2)
+        t_test(rm_steps_list,wf_steps_list)
+        plt.hist(rm_steps_list, bins=50,label="RandomWalk",alpha=0.7)
+        plt.hist(wf_steps_list, bins=50,label="WallFollow",alpha=0.7)
+        plt.legend()
+        plt.xlabel("Steps")
+        plt.ylabel("Frequency")
+        plt.title("Distribution of Steps in level "+str(l))
+        plt.show()
 
 
     # Draw the plots
@@ -446,5 +475,5 @@ class WallFollow():
 randommove_ai=RandomMove()
 wallfollow_ai=WallFollow()
 
-simulate()
+simulate(iter_times=1000)
 

@@ -83,6 +83,7 @@ def locate_random(num_space,way):
                     if current == loc:
                         return [a, b]
 
+# The function to
 def placement(way="random"):
     global config, current_place, num_space, destination, animal_list
 
