@@ -1,4 +1,4 @@
-# Tutorial to Replicate The Result
+# Tutorial to Replicate The Result and Play the Game
 
 #### All the code can be run on Mac. Not sure whether it's adaptability on Windows.
 You need to clone the repo to local and run the following commands for different tasks.
