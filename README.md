@@ -11,7 +11,7 @@ You need to clone the repo to local and run the following commands for different
 
 ### DCGAN Training
 1. have the preprocessed images, you can also access it by: https://drive.google.com/file/d/19jHdSa-W4SCvqRWt5i1DKWAAbJfjh2Go/view?usp=sharing;
-2. open DCGAN_CP_v2.ipynb with google colab;
+2. open DCGAN_CP_Final.ipynb with google colab;
 3. upload the datasets;
 4. run the code blocks one by one.
 
