@@ -8,7 +8,7 @@ You need to clone the repo to local and run the following commands for different
 1. install python3 in your computer;
 2. open the command line of your computer, use `git clone https://github.com/Cyuhaohao/CapstoneProject.git` to clone the code to your local;
 3. use command `cd CapstoneProject` to enter the directory of the game
-4. install required package like pygame. You can use command `pip install -r requirements.txt`;
+4. install required package like pygame. You can use command `pip install -r requirements2.txt`;
 5. run `python3 Playgame.py` to start playing the game;
 
 ### Analyze the efficiency of different Game AIs
