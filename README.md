@@ -1,5 +1,17 @@
-# Introduction Video [For the class session]
+# Introduction Video and Gameplay Introduction [For the class session]
+## Watch Video
 Go to the YouTube Link: https://youtu.be/UstsXwr34ws.
+
+### Play the Game
+1. install python3 in your computer;
+2. open the command line of your computer, use `git clone https://github.com/Cyuhaohao/CapstoneProject.git` to clone the code to your local;
+3. use command `cd CapstoneProject` to enter the directory of the game
+4. install required package like pygame. You can use command `pip install -r requirements2.txt`;
+5. run `python3 Playgame.py` to start playing the game;
+
+
+
+
 
 # Tutorial to Replicate The Result and Play the Game
 
