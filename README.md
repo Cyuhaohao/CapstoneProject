@@ -1,3 +1,6 @@
+# Introduction Video [For the class session]
+Go to the YouTube Link: https://youtu.be/UstsXwr34ws.
+
 # Tutorial to Replicate The Result and Play the Game
 
 #### All the code can be run on Mac. Not sure whether it's adaptable on Windows.
