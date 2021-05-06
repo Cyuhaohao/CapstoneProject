@@ -1,4 +1,4 @@
-# Introduction Video and Gameplay Introduction [For the class session]
+# Introduction Video and Gameplay Introduction
 ## Watch Video
 Go to the YouTube Link: https://youtu.be/UstsXwr34ws.
 
